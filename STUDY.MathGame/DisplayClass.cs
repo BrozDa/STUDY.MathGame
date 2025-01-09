@@ -36,6 +36,7 @@ namespace STUDY.MathGame
             Console.WriteLine();
             Console.WriteLine("5. Show game history");
             Console.WriteLine();
+            Console.WriteLine("Please enter a number representing your choice followed-up by 'Enter': ");
             Console.Write("Your choice: ");
 
         }

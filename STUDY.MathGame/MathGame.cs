@@ -1,43 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace STUDY.MathGame
 {
+    /// <summary>
+    /// Represents operations chosen by user within the MathGame
+    /// </summary>
     enum Operations
     {
-        Addition = 1,
-        Substraction = 2,
-        Multiplication = 3,
-        Division = 4,
+        Addition,
+        Substraction,
+        Multiplication,
+        Division,
         History,
         Exit,
         Menu,
     }
-   
+    /// <summary>
+    /// Class supporting the Math game
+    /// </summary>
     internal class MathGame
     {
-        private List<string> history;
-        private ConsoleKey userChoice;
+        /// <summary>
+        /// list property is used to track history games
+        /// userChoice key property is used to track user input
+        /// _maxNumber readonly field is used to determine max number for math operations
+        /// </summary>
+        private List<string> history { get; set; }
+        private ConsoleKey userChoice { get; set; }
         private readonly int _maxNumber = 10;
 
+        /// <summary>
+        /// Initializes new instance of MathGame class
+        /// Initialization of list used to track history
+        /// </summary>
         public MathGame()
         {
             history = new List<string>();
         }
 
-
+        /// <summary>
+        /// main method faciliating the game using infinite loop until its broken by user choice
+        /// </summary>
         public void StartGame()
-        {
-            
-
+        {   
             while (true) {
 
                 DisplayClass.PrintMenu();
-                userChoice = Console.ReadKey().Key;
-                Console.ReadKey();
+                userChoice = GetUserInput();
+
                 Operations operation = OperationChoice(userChoice);
                 int[] numbers = new int[2];
 
@@ -56,12 +71,37 @@ namespace STUDY.MathGame
                         Console.ReadKey();
                         break;
                 }
-                
-
             }
             
         }
-        public void PlayRound(Operations operation)
+        /// <summary>
+        /// 
+        /// </summary>
+        private ConsoleKey GetUserInput()
+        {
+            bool validated = false;
+
+            while (!validated)
+            {
+                userChoice = Console.ReadKey().Key;
+                ConsoleKey validation = Console.ReadKey().Key;
+                if(validation == ConsoleKey.Enter)
+                {
+                    validated = true;
+                }
+                else
+                {
+                    Console.WriteLine("\nPlease enter a VALID number representing your choice followed-up by 'Enter': ");
+                    Console.Write("Your choice: ");
+                }
+            }
+
+            return userChoice;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private void PlayRound(Operations operation)
         {
 
             int[] numbers = new int[2];
@@ -97,6 +137,9 @@ namespace STUDY.MathGame
             }
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
         private void EndRound(ConsoleKey key)
         {
             if (key == ConsoleKey.Enter)
@@ -104,6 +147,9 @@ namespace STUDY.MathGame
             else
                 Environment.Exit(0);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         private char GetOperationCharacter(Operations operation)
         {
             return operation switch
@@ -115,6 +161,9 @@ namespace STUDY.MathGame
                 _ => throw new NotImplementedException("Invalid ENUM value passed"),
             };
         }
+        /// <summary>
+        /// 
+        /// </summary>
         private int GetResult(int[] numbers, Operations operation)
         {
             return operation switch
@@ -126,6 +175,9 @@ namespace STUDY.MathGame
                 _ => throw new NotImplementedException("Invalid ENUM value passed")
             };
         }
+        /// <summary>
+        /// 
+        /// </summary>
         private Operations OperationChoice(ConsoleKey userInput)
         {
            switch (userChoice) {
@@ -157,7 +209,9 @@ namespace STUDY.MathGame
 
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         private int[] GetOperationNumbers(bool division = false)
         {
             Random random = new Random();
@@ -179,8 +233,10 @@ namespace STUDY.MathGame
 
             return numbers;
         }
-        
-    
+
+        /// <summary>
+        /// 
+        /// </summary>
         private void AddGameToHistory(char operation, int rounds) {
             string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds}";
             history.Add(game);
