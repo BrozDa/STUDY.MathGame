@@ -39,25 +39,28 @@ namespace STUDY.MathGame
             Console.Write("Your choice: ");
 
         }
-        public static void PrintGame(int roundNumber, int firstNumber, int secondNumber, char operation)
+        public static void PrintGame(int roundNumber, int[] numbers, char operation)
         {
             
             PrintHeader(roundNumber);
             
-            Console.Write($"{firstNumber} {operation} {secondNumber} = ");
+            Console.Write($"{numbers[0]} {operation} {numbers[1]} = ");
         }
 
-        public static void PrintEndGame(int roundNumber, int firstNumber, int secondNumber, char operation, int userInput, int result)
+        public static void PrintEndGame(int roundNumber, int[] numbers, char operation, int userInput, int result)
         {
             PrintHeader(roundNumber);
-            Console.WriteLine($"{firstNumber} {operation} {secondNumber} = {userInput}");
+            Console.WriteLine($"{numbers[0]} {operation} {numbers[1]} = {userInput}");
             Console.WriteLine("You loose");
             Console.WriteLine($"Your answer: {userInput}, correct answer: {result}");
             Console.WriteLine();
-            Console.WriteLine("Press 'Enter' to return to the main menu, press anything else to exit");
+            Console.WriteLine("Press 'Enter' to return to the main menu or press anything else to exit");
 
         }
         public static void PrintHistory(List<string> history) {
+            Console.Clear();
+            PrintHeader();
+
             if (history.Count == 0)
             {
                 Console.WriteLine("No games in history");
@@ -68,9 +71,11 @@ namespace STUDY.MathGame
                     Console.WriteLine($"{index}: {line}");
                     index++;
                 }
-                Console.WriteLine("Press 'Enter' to return to the main menu, press anything else to exit");
+                
 
             }
+            Console.WriteLine();
+            Console.WriteLine("Press 'Enter' to return to the main menu or press anything else to exit");
         }
 
 

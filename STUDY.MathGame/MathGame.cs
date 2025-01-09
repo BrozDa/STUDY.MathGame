@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace STUDY.MathGame
 {
-    enum Operations: int
+    enum Operations
     {
         Addition = 1,
-        Substraction =2,
+        Substraction = 2,
         Multiplication = 3,
         Division = 4,
-        History = 5
+        History,
+        Exit,
+        Menu,
     }
    
     internal class MathGame
@@ -25,112 +27,164 @@ namespace STUDY.MathGame
         {
             history = new List<string>();
         }
+
+
         public void StartGame()
         {
-            DisplayClass.PrintMenu();
-            userChoice = Console.ReadKey().Key;
-            Console.ReadKey();
+            
+
             while (true) {
-                OperationChoice(userChoice);
+
+                DisplayClass.PrintMenu();
+                userChoice = Console.ReadKey().Key;
+                Console.ReadKey();
+                Operations operation = OperationChoice(userChoice);
+                int[] numbers = new int[2];
+
+                switch (operation) {
+                    case Operations.Exit:
+                        Environment.Exit(0);
+                        break;
+                    case Operations.Addition:
+                    case Operations.Substraction:
+                    case Operations.Multiplication:
+                    case Operations.Division:
+                        PlayRound(operation);  
+                        break;
+                    case Operations.History:
+                        DisplayClass.PrintHistory(history);
+                        Console.ReadKey();
+                        break;
+                }
+                
+
             }
             
         }
+        public void PlayRound(Operations operation)
+        {
 
-        private void OperationChoice(ConsoleKey userInput)
+            int[] numbers = new int[2];
+            bool validResponse = true;
+            int roundNumber = 1;
+            char operationCharacter = GetOperationCharacter(operation);
+
+            while (validResponse)
+            {
+                if (operation != Operations.Division)
+                    numbers = GetOperationNumbers();
+                else
+                    numbers = GetOperationNumbers(true);
+
+                DisplayClass.PrintGame(roundNumber, numbers, operationCharacter);
+
+                int result = GetResult(numbers, operation);
+                int userResult;
+                int.TryParse(Console.ReadLine(), out userResult);
+
+                if(userResult == result)
+                    roundNumber++;
+                else
+                {
+                    validResponse = false;
+                    
+                    
+                    DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter,userResult, result);
+                    userChoice = Console.ReadKey().Key;
+                    AddGameToHistory(operationCharacter, roundNumber);
+                    EndRound(userChoice);
+                }
+            }
+
+        }
+        private void EndRound(ConsoleKey key)
+        {
+            if (key == ConsoleKey.Enter)
+                StartGame();
+            else
+                Environment.Exit(0);
+        }
+        private char GetOperationCharacter(Operations operation)
+        {
+            return operation switch
+            {
+                Operations.Addition => '+',
+                Operations.Substraction => '-',
+                Operations.Multiplication => '*',
+                Operations.Division => '/',
+                _ => throw new NotImplementedException("Invalid ENUM value passed"),
+            };
+        }
+        private int GetResult(int[] numbers, Operations operation)
+        {
+            return operation switch
+            {
+                Operations.Addition => numbers[0] + numbers[1],
+                Operations.Substraction => numbers[0] - numbers[1],
+                Operations.Multiplication => numbers[0] * numbers[1],
+                Operations.Division => numbers[0] / numbers[1],
+                _ => throw new NotImplementedException("Invalid ENUM value passed")
+            };
+        }
+        private Operations OperationChoice(ConsoleKey userInput)
         {
            switch (userChoice) {
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1: 
-                    Addition(); 
-                    break;
+                    return Operations.Addition;
 
                 case ConsoleKey.NumPad2:
-                case ConsoleKey.D2: 
-                    Substraction(); 
-                    break;
+                case ConsoleKey.D2:
+                    return Operations.Substraction;
 
                 case ConsoleKey.NumPad3:
-                case ConsoleKey.D3: 
-                    Multiplication(); 
-                    break;
+                case ConsoleKey.D3:
+                    return Operations.Multiplication;
 
                 case ConsoleKey.NumPad4:
-                case ConsoleKey.D4: 
-                    Division(); 
-                    break;
+                case ConsoleKey.D4:
+                    return Operations.Division;
 
                 case ConsoleKey.NumPad5:
-                case ConsoleKey.D5: 
-                    ShowGameHistory(); break;
+                case ConsoleKey.D5:
+                    return Operations.History;
 
-                case ConsoleKey.Escape: Environment.Exit(0); break;
+                case ConsoleKey.Escape: 
+                    return Operations.Exit;
 
-                default: StartGame();break;
+                default:
+                    return Operations.Menu;
 
             }
         }
-        private void Addition() 
+
+        private int[] GetOperationNumbers(bool division = false)
         {
-            bool userAnswer = true;
-            int roundNumber = 1;
             Random random = new Random();
-            int firstNumber = 0;
-            int secondNumber = 0;
-            int userInput= 0;
-            int operationResult = 0;
-
-            while (userAnswer == true) {
-                firstNumber = random.Next(_maxNumber + 1);
-                secondNumber = random.Next(_maxNumber + 1);
-                operationResult = firstNumber + secondNumber;
-
-                DisplayClass.PrintGame(roundNumber, firstNumber, secondNumber, '+');
-                
-                int.TryParse(Console.ReadLine(), out userInput);
-
-                if (operationResult == userInput)
-                    roundNumber++;
-                else
-                    userAnswer = false;
-            }
-            DisplayClass.PrintEndGame(roundNumber,firstNumber,secondNumber,'+', userInput, operationResult);
-
-            userChoice = Console.ReadKey().Key;
-            if (userChoice == ConsoleKey.Enter)
+            int[] numbers = new int[2];
+            if (!division)
             {
-                AddGameToHistory('+', roundNumber);
-                DisplayClass.PrintMenu();
+                numbers[0] = random.Next(_maxNumber);
+                numbers[1] = random.Next(_maxNumber);
             }
             else
             {
-                Environment.Exit(0);
+                // fisrt getting divisor
+                // then, divident will be calculated as random numer times divisor
+                int divisor = random.Next(1,_maxNumber);
+
+                numbers[1] = divisor;
+                numbers[0] = random.Next(_maxNumber) * divisor;
             }
-        
+
+            return numbers;
         }
         
-        private void Substraction() { }
-        private void Multiplication() { }
-        private void Division() { }
-
+    
         private void AddGameToHistory(char operation, int rounds) {
             string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds}";
             history.Add(game);
             
-        } 
-        private void ShowGameHistory()
-        {
-            DisplayClass.PrintHeader();
-
-            DisplayClass.PrintHistory(history);
-            userChoice = Console.ReadKey().Key;
-            if (userChoice == ConsoleKey.Enter)
-            {
-                DisplayClass.PrintMenu();
-            }
-            else
-            {
-                Environment.Exit(0);
-            }
         }
 
     }
