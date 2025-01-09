@@ -22,7 +22,9 @@
 
         static void Main(string[] args)
         {
-            
+            MathGame game = new MathGame();
+            game.StartGame();
+            Console.ReadLine();
         }
     }
 }
