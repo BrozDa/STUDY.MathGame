@@ -75,7 +75,8 @@ namespace STUDY.MathGame
             
         }
         /// <summary>
-        /// 
+        /// Method for getting user input and confirming using enter key
+        /// Implemented this way as Console.Readkey() continues right after key press
         /// </summary>
         private ConsoleKey GetUserInput()
         {
@@ -99,8 +100,9 @@ namespace STUDY.MathGame
             return userChoice;
         }
         /// <summary>
-        /// 
+        /// Method faciliating one round of the game
         /// </summary>
+        /// <param name="operation">Operation which user choose</param>
         private void PlayRound(Operations operation)
         {
 
@@ -127,29 +129,37 @@ namespace STUDY.MathGame
                 else
                 {
                     validResponse = false;
-                    
-                    
-                    DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter,userResult, result);
-                    userChoice = Console.ReadKey().Key;
-                    AddGameToHistory(operationCharacter, roundNumber);
-                    EndRound(userChoice);
+                    EndRound(roundNumber, numbers, operationCharacter, userResult, result);
+
                 }
+                    
+                    
             }
 
         }
         /// <summary>
-        /// 
+        /// Method handling end of the round, adding game to history and user choice to continue or exit the app
         /// </summary>
-        private void EndRound(ConsoleKey key)
+        /// <param name="roundNumber">Number of current round played</param>
+        /// <param name="numbers">Numbers used for the equation</param>
+        /// <param name="operationCharacter">Character representing the operation</param>
+        /// <param name="userResult">user input - invalid result to the equation</param>
+        /// <param name="result">Valid result of the equation</param>
+        private void EndRound(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result)
         {
-            if (key == ConsoleKey.Enter)
+            DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter, userResult, result);
+            userChoice = Console.ReadKey().Key;
+            AddGameToHistory(operationCharacter, roundNumber);
+            if (userChoice == ConsoleKey.Enter)
                 StartGame();
             else
                 Environment.Exit(0);
         }
         /// <summary>
-        /// 
+        /// Method to receive appropriate character for each operation, used for logging games to history
         /// </summary>
+        /// <param name="operation">Operation user choose for the game</param>
+        /// <returns>Character representing each operation</returns>
         private char GetOperationCharacter(Operations operation)
         {
             return operation switch
@@ -162,8 +172,11 @@ namespace STUDY.MathGame
             };
         }
         /// <summary>
-        /// 
+        /// Method used to calculate result of the current round
         /// </summary>
+        /// <param name="numbers">Numbers generated for current round</param>
+        /// <param name="operation">Operation user choose for the game</param>
+        /// <returns>integer representing the result</returns>
         private int GetResult(int[] numbers, Operations operation)
         {
             return operation switch
@@ -176,8 +189,10 @@ namespace STUDY.MathGame
             };
         }
         /// <summary>
-        /// 
+        /// Method faciliating "translation" of input to specific operations represented by Enum
         /// </summary>
+        /// <param name="userInput">Key pressed by the user</param>
+        /// <returns>Enum value representing chosen operation</returns>
         private Operations OperationChoice(ConsoleKey userInput)
         {
            switch (userChoice) {
@@ -210,8 +225,10 @@ namespace STUDY.MathGame
             }
         }
         /// <summary>
-        /// 
+        /// Method for getting numbers used for the calculations within the game
         /// </summary>
+        /// <param name="division">Optional parameter to represent division operation</param>
+        /// <returns>int array of 2 values representing generated numbers</returns>
         private int[] GetOperationNumbers(bool division = false)
         {
             Random random = new Random();
@@ -235,8 +252,10 @@ namespace STUDY.MathGame
         }
 
         /// <summary>
-        /// 
+        /// Method faciliating adding played game to the history list
         /// </summary>
+        /// <param name="operation">Represents operand using in the game</param>
+        /// <param name="rounds">Represents number of rounds played</param>
         private void AddGameToHistory(char operation, int rounds) {
             string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds}";
             history.Add(game);
