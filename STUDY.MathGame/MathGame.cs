@@ -59,7 +59,7 @@ namespace STUDY.MathGame
             _timer.Enabled = true;
             _timer.Interval = 1000;
             _timer.AutoReset = true;
-            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.PrintHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.UpdateHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
         }
         public void StopTimer()
         {
@@ -159,14 +159,11 @@ namespace STUDY.MathGame
         private bool PlayRound(Operations operation)
         {
             StartTimer();
-            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.PrintHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
-            DisplayClass.PrintMenuHeader(_round);
+            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.UpdateHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+            DisplayClass.PrintGameHeader(_round, _gameTime.Elapsed);
 
             Operations roundStart = operation;
             int[] numbers = new int[2];
-            
-            
-            
 
             if (operation == Operations.Random)
                 operation = GetRandomOperation();

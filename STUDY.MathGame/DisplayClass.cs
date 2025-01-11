@@ -12,32 +12,55 @@ namespace STUDY.MathGame
     internal static class DisplayClass
     {
         /// <summary>
-        /// Prints header for each output
+        /// Prints header for the menu
         /// </summary>
-        /// <param name="roundNumber">Optional parameter, if not specified then header for completely new game is printed</param>
-        public static void PrintMenuHeader(int roundNumber = 0)
+        public static void PrintMenuHeader()
         {
             Console.Clear();
             int windowWidth = Console.WindowWidth;
             string welcomeMessage = "Welcome to Math Game";
             int leftPadding = (windowWidth - welcomeMessage.Length)/ 2;
-
-            if (roundNumber == 0) {
                 Console.WriteLine(new string('#', windowWidth));
                 Console.WriteLine(new string(' ', leftPadding) + "Welcome to Math Game");
                 Console.WriteLine(new string('#', windowWidth));
-            }
-            else
-            {
-                Console.WriteLine(new string('#', windowWidth));
-                Console.WriteLine($"\t" +
-                    $"Round Duration: {0}s" +
-                    $"\t\tMath Game round: {roundNumber}" +
-                    $"\t\tGame Duration: {0}s");
-                Console.WriteLine(new string('#', windowWidth));
-            }
         }
-        
+        /// <summary>
+        /// Prints header for a the game
+        /// </summary>
+        /// <param name="roundNumber">Current number of the round</param>
+        /// <param name="gameDuration">Duration of current game</param>
+        public static void PrintGameHeader(int roundNumber, TimeSpan gameDuration)
+        {
+            Console.Clear();
+            int windowWidth = Console.WindowWidth;
+            Console.WriteLine(new string('#', windowWidth));
+            Console.WriteLine($"\t" +
+                $"Round Duration: 00:00" +
+                $"\t\tMath Game round: {roundNumber}" +
+                $"\t\tGame Duration: {gameDuration.ToString(@"mm\:ss")}");
+            Console.WriteLine(new string('#', windowWidth));
+        }
+        /// <summary>
+        /// Updates menu with current duration for round and the game
+        /// </summary>
+        /// <param name="roundDuration">Duration of current round</param>
+        /// <param name="gameDuration">Duration of current round</param>
+        /// <param name="roundNumber">Current number of the round</param>
+        public static void UpdateHeaderWithTime(TimeSpan roundDuration, TimeSpan gameDuration, int roundNumber)
+        {
+            Console.CursorVisible = false;
+            int originalTop = Console.CursorTop;
+            int originalLeft = Console.CursorLeft;
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine($"" +
+                $"\tRound Duration: {roundDuration.ToString(@"mm\:ss")}" +
+                $"\t\tMath Game round: {roundNumber}" +
+                $"\t\tGame Duration: {gameDuration.ToString(@"mm\:ss")}");
+
+            Console.SetCursorPosition(originalLeft, originalTop);
+            Console.CursorVisible = true;
+        }
+
         /// <summary>
         /// Prints selection menu
         /// </summary>
@@ -108,20 +131,6 @@ namespace STUDY.MathGame
             Console.WriteLine();
             Console.WriteLine("Press 'Enter' to return to the main menu or press anything else to exit");
         }
-        public static void PrintHeaderWithTime(TimeSpan roundTime, TimeSpan gameTime, int roundNumber)
-        {
-            Console.CursorVisible = false;
-            int originalTop = Console.CursorTop;
-            int originalLeft = Console.CursorLeft;
-            Console.SetCursorPosition(0, 1);
-            Console.WriteLine($"" +
-                $"\tRound Duration: {roundTime.Seconds}s" +
-                $"\t\tMath Game round: {roundNumber}" +
-                $"\t\tGame Duration: {gameTime.Seconds}s");
-
-            Console.SetCursorPosition(originalLeft, originalTop);
-            Console.CursorVisible = true;
-        }
-
+        
     }
 }
