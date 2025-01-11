@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace STUDY.MathGame
 {
@@ -34,6 +36,8 @@ namespace STUDY.MathGame
         private int userChoice { get; set; }
         private int _maxNumber = 10;
         private int _round = 0;
+       // private System.Timers.Timer _roundTimer;
+
 
         /// <summary>
         /// Initializes new instance of MathGame class
@@ -44,6 +48,10 @@ namespace STUDY.MathGame
             history = new List<string>();
         }
 
+        public void SetTimer(int interval = 1000)
+        {
+
+        }
         /// <summary>
         /// Faciliates the game using infinite loop until its broken by user choice
         /// </summary>
