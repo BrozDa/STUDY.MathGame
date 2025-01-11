@@ -36,7 +36,9 @@ namespace STUDY.MathGame
         private int userChoice { get; set; }
         private int _maxNumber = 10;
         private int _round = 0;
-       // private System.Timers.Timer _roundTimer;
+        private Stopwatch _roundTime;
+        private Stopwatch _gameTime;
+        private System.Timers.Timer _timer;
 
 
         /// <summary>
@@ -46,11 +48,23 @@ namespace STUDY.MathGame
         public MathGame()
         {
             history = new List<string>();
+            _roundTime = new Stopwatch();
+            _gameTime = new Stopwatch();
+            _timer = new System.Timers.Timer();
         }
 
-        public void SetTimer(int interval = 1000)
+        public void StartTimer()
         {
-
+            _roundTime.Start();
+            _timer.Enabled = true;
+            _timer.Interval = 1000;
+            _timer.AutoReset = true;
+            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.PrintHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+        }
+        public void StopTimer()
+        {
+            _roundTime.Reset();
+            _timer.Enabled= false;
         }
         /// <summary>
         /// Faciliates the game using infinite loop until its broken by user choice
@@ -122,7 +136,8 @@ namespace STUDY.MathGame
         private void PlayGame(Operations operation)
         {
 
-            
+            _gameTime.Start();
+
             bool validResponse = true;
             _round = 1;
             char operationCharacter = GetOperationCharacter(operation);
@@ -132,6 +147,8 @@ namespace STUDY.MathGame
                 validResponse = PlayRound(operation);
                 _round++;
             }
+
+            
             _round = 1;
         }
         /// <summary>
@@ -141,8 +158,14 @@ namespace STUDY.MathGame
         /// <returns>True, if user's answer is corrent, false otherwise</returns>
         private bool PlayRound(Operations operation)
         {
+            StartTimer();
+            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.PrintHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+            DisplayClass.PrintMenuHeader(_round);
+
             Operations roundStart = operation;
             int[] numbers = new int[2];
+            
+            
             
 
             if (operation == Operations.Random)
@@ -154,11 +177,13 @@ namespace STUDY.MathGame
                 numbers = GetOperationNumbers(true);
 
             char operationCharacter = GetOperationCharacter(operation);
-            DisplayClass.PrintRound(_round, numbers, operationCharacter);
+            DisplayClass.PrintRoundEquation(_round, numbers, operationCharacter);
 
             int result = GetResult(numbers, operation);
             int userResult;
             int.TryParse(Console.ReadLine(), out userResult);
+
+            StopTimer();
 
             if (userResult == result)
             {
@@ -166,7 +191,8 @@ namespace STUDY.MathGame
             }
             else {
                 operationCharacter = GetOperationCharacter(roundStart);
-                EndRound(_round, numbers, operationCharacter, userResult, result);
+                EndCurrentGame(_round, numbers, operationCharacter, userResult, result, _gameTime.Elapsed);
+                _gameTime.Reset();
                 return false;
             }
 
@@ -193,15 +219,14 @@ namespace STUDY.MathGame
         /// <param name="operationCharacter">Character representing the operation</param>
         /// <param name="userResult">user input - invalid result to the equation</param>
         /// <param name="result">Valid result of the equation</param>
-        private void EndRound(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result)
+        private void EndCurrentGame(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result, TimeSpan gameTime)
         {
             DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter, userResult, result);
             ConsoleKey input = Console.ReadKey().Key;
-            AddGameToHistory(operationCharacter, roundNumber);
-            if (input == ConsoleKey.Enter)
-                StartGame();
-            else
+            AddGameToHistory(operationCharacter, roundNumber,gameTime);
+            if (input != ConsoleKey.Enter)
                 Environment.Exit(0);
+               
         }
         /// <summary>
         /// Receive appropriate character for each operation, used for logging games to history
@@ -289,8 +314,8 @@ namespace STUDY.MathGame
         /// </summary>
         /// <param name="operation">Represents operand using in the game</param>
         /// <param name="rounds">Represents number of rounds played</param>
-        private void AddGameToHistory(char operation, int rounds) {
-            string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds}";
+        private void AddGameToHistory(char operation, int rounds, TimeSpan gameTime) {
+            string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds} | Time {gameTime.Seconds}s";
             history.Add(game);
             
         }

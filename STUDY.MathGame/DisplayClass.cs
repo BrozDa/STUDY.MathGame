@@ -15,7 +15,7 @@ namespace STUDY.MathGame
         /// Prints header for each output
         /// </summary>
         /// <param name="roundNumber">Optional parameter, if not specified then header for completely new game is printed</param>
-        public static void PrintHeader(int roundNumber = 0)
+        public static void PrintMenuHeader(int roundNumber = 0)
         {
             Console.Clear();
             int windowWidth = Console.WindowWidth;
@@ -30,16 +30,20 @@ namespace STUDY.MathGame
             else
             {
                 Console.WriteLine(new string('#', windowWidth));
-                Console.WriteLine(new string(' ', leftPadding) + "Math Game round " + roundNumber);
+                Console.WriteLine($"\t" +
+                    $"Round Duration: {0}s" +
+                    $"\t\tMath Game round: {roundNumber}" +
+                    $"\t\tGame Duration: {0}s");
                 Console.WriteLine(new string('#', windowWidth));
             }
         }
+        
         /// <summary>
         /// Prints selection menu
         /// </summary>
         public static void PrintMenu()
         {
-            PrintHeader();
+            PrintMenuHeader();
 
             Console.WriteLine("Please select one option to start a new game, show game history, or press 'ESC' to exit: ");
             Console.WriteLine("1. Addition");
@@ -61,11 +65,8 @@ namespace STUDY.MathGame
         /// <param name="roundNumber">number of the round</param>
         /// <param name="numbers">array of numbers used for equation</param>
         /// <param name="operation">opearation characted</param>
-        public static void PrintRound(int roundNumber, int[] numbers, char operation)
+        public static void PrintRoundEquation(int roundNumber, int[] numbers, char operation)
         {
-            
-            PrintHeader(roundNumber);
-            
             Console.Write($"{numbers[0]} {operation} {numbers[1]} = ");
         }
         /// <summary>
@@ -91,7 +92,7 @@ namespace STUDY.MathGame
         /// <param name="history">List containing game history</param>
         public static void PrintHistory(List<string> history) {
             Console.Clear();
-            PrintHeader();
+            PrintMenuHeader();
 
             if (history.Count == 0)
             {
@@ -107,7 +108,20 @@ namespace STUDY.MathGame
             Console.WriteLine();
             Console.WriteLine("Press 'Enter' to return to the main menu or press anything else to exit");
         }
+        public static void PrintHeaderWithTime(TimeSpan roundTime, TimeSpan gameTime, int roundNumber)
+        {
+            Console.CursorVisible = false;
+            int originalTop = Console.CursorTop;
+            int originalLeft = Console.CursorLeft;
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine($"" +
+                $"\tRound Duration: {roundTime.Seconds}s" +
+                $"\t\tMath Game round: {roundNumber}" +
+                $"\t\tGame Duration: {gameTime.Seconds}s");
 
+            Console.SetCursorPosition(originalLeft, originalTop);
+            Console.CursorVisible = true;
+        }
 
     }
 }
