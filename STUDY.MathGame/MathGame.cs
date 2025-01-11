@@ -32,7 +32,7 @@ namespace STUDY.MathGame
         /// _maxNumber readonly field is used to determine max number for math operations
         /// </summary>
         private List<string> history { get; set; }
-        private ConsoleKey userChoice { get; set; }
+        private int userChoice { get; set; }
         private int _maxNumber = 100;
 
         /// <summary>
@@ -76,29 +76,35 @@ namespace STUDY.MathGame
             
         }
         /// <summary>
-        /// Method for getting user input and confirming using enter key
-        /// Implemented this way as Console.Readkey() continues right after key press
+        /// Method for getting user's input
         /// </summary>
-        private ConsoleKey GetUserInput()
+        /// <returns>Numeric value representation of pressed key</returns>
+        private int GetUserInput()
         {
             bool validated = false;
 
-            while (!validated)
-            {
-                userChoice = Console.ReadKey().Key;
-                ConsoleKey validation = Console.ReadKey().Key;
-                if(validation == ConsoleKey.Enter)
+            string? input;
+            int numericInput = 0;
+
+            while (!validated) {
+                input = Console.ReadLine();
+                if (!int.TryParse(input, out numericInput))
                 {
-                    validated = true;
+                    Console.WriteLine("\nPlease enter a NUMBER representing your choice followed-up by 'Enter': ");
+                    Console.Write("Your choice: ");
                 }
-                else
+                else if (numericInput < 1 || numericInput > 7)
                 {
                     Console.WriteLine("\nPlease enter a VALID number representing your choice followed-up by 'Enter': ");
                     Console.Write("Your choice: ");
                 }
-            }
+                else
+                {
+                    validated = true;
+                }
 
-            return userChoice;
+            }
+            return numericInput;
         }
         /// <summary>
         /// Method faciliating one round of the game
@@ -149,9 +155,9 @@ namespace STUDY.MathGame
         private void EndRound(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result)
         {
             DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter, userResult, result);
-            userChoice = Console.ReadKey().Key;
+            ConsoleKey input = Console.ReadKey().Key;
             AddGameToHistory(operationCharacter, roundNumber);
-            if (userChoice == ConsoleKey.Enter)
+            if (input == ConsoleKey.Enter)
                 StartGame();
             else
                 Environment.Exit(0);
@@ -192,44 +198,21 @@ namespace STUDY.MathGame
         /// <summary>
         /// Method faciliating "translation" of input to specific operations represented by Enum
         /// </summary>
-        /// <param name="userInput">Key pressed by the user</param>
+        /// <param name="numericInput">Numberic value of key pressed by the user</param>
         /// <returns>Enum value representing chosen operation</returns>
-        private Operations OperationChoice(ConsoleKey userInput)
+        private Operations OperationChoice(int numericInput)
         {
-           switch (userChoice) {
-                case ConsoleKey.NumPad1:
-                case ConsoleKey.D1: 
-                    return Operations.Addition;
-
-                case ConsoleKey.NumPad2:
-                case ConsoleKey.D2:
-                    return Operations.Substraction;
-
-                case ConsoleKey.NumPad3:
-                case ConsoleKey.D3:
-                    return Operations.Multiplication;
-
-                case ConsoleKey.NumPad4:
-                case ConsoleKey.D4:
-                    return Operations.Division;
-
-                case ConsoleKey.NumPad5:
-                case ConsoleKey.D5:
-                    return Operations.History;
-
-                case ConsoleKey.NumPad6:
-                case ConsoleKey.D6:
-                    return Operations.History;
-
-                case ConsoleKey.NumPad7:
-                case ConsoleKey.D7:
-                case ConsoleKey.Escape:
-                    return Operations.Exit;
-
-                default:
-                    return Operations.Menu;
-
-            }
+            return numericInput switch
+            {
+                1 => Operations.Addition,
+                2 => Operations.Substraction,
+                3 => Operations.Multiplication,
+                4 => Operations.Division,
+                5 => Operations.Random,
+                6 => Operations.History,
+                7 => Operations.Exit,
+                _ => throw new NotImplementedException("Invalid ENUM passed")
+            };
         }
         /// <summary>
         /// Method for getting numbers used for the calculations within the game
