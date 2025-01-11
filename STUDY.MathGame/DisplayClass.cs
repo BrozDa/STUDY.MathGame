@@ -46,7 +46,7 @@ namespace STUDY.MathGame
             Console.WriteLine("2. Substraction");
             Console.WriteLine("3. Multiplication");
             Console.WriteLine("4. Division");
-            Console.WriteLine("5. Random game ---- TO BE IMPLEMENTED");
+            Console.WriteLine("5. Random game");
             Console.WriteLine();
             Console.WriteLine("6. Show game history");
             Console.WriteLine("7. Exit game");
@@ -61,7 +61,7 @@ namespace STUDY.MathGame
         /// <param name="roundNumber">number of the round</param>
         /// <param name="numbers">array of numbers used for equation</param>
         /// <param name="operation">opearation characted</param>
-        public static void PrintGame(int roundNumber, int[] numbers, char operation)
+        public static void PrintRound(int roundNumber, int[] numbers, char operation)
         {
             
             PrintHeader(roundNumber);
@@ -78,8 +78,7 @@ namespace STUDY.MathGame
         /// <param name="result">Actual result of the equation</param>
         public static void PrintEndGame(int roundNumber, int[] numbers, char operation, int userInput, int result)
         {
-            PrintHeader(roundNumber);
-            Console.WriteLine($"{numbers[0]} {operation} {numbers[1]} = {userInput}");
+            
             Console.WriteLine("You loose");
             Console.WriteLine($"Your answer: {userInput}, correct answer: {result}");
             Console.WriteLine();

@@ -12,14 +12,13 @@ namespace STUDY.MathGame
     /// </summary>
     enum Operations
     {
-        Addition,
-        Substraction,
-        Multiplication,
-        Division,
-        Random,
-        History,
-        Exit,
-        Menu,
+        Addition = 1,
+        Substraction =2,
+        Multiplication = 3,
+        Division = 4,
+        Random = 5,
+        History = 6,
+        Exit = 7,
     }
     /// <summary>
     /// Class supporting the Math game
@@ -33,7 +32,8 @@ namespace STUDY.MathGame
         /// </summary>
         private List<string> history { get; set; }
         private int userChoice { get; set; }
-        private int _maxNumber = 100;
+        private int _maxNumber = 10;
+        private int _round = 0;
 
         /// <summary>
         /// Initializes new instance of MathGame class
@@ -45,7 +45,7 @@ namespace STUDY.MathGame
         }
 
         /// <summary>
-        /// main method faciliating the game using infinite loop until its broken by user choice
+        /// Faciliates the game using infinite loop until its broken by user choice
         /// </summary>
         public void StartGame()
         {   
@@ -65,7 +65,8 @@ namespace STUDY.MathGame
                     case Operations.Substraction:
                     case Operations.Multiplication:
                     case Operations.Division:
-                        PlayRound(operation);
+                    case Operations.Random:
+                        PlayGame(operation);
                         break;
                     case Operations.History:
                         DisplayClass.PrintHistory(history);
@@ -76,7 +77,7 @@ namespace STUDY.MathGame
             
         }
         /// <summary>
-        /// Method for getting user's input
+        /// Gets user's input
         /// </summary>
         /// <returns>Numeric value representation of pressed key</returns>
         private int GetUserInput()
@@ -107,45 +108,77 @@ namespace STUDY.MathGame
             return numericInput;
         }
         /// <summary>
-        /// Method faciliating one round of the game
+        /// Faciliating a single round of the game
         /// </summary>
         /// <param name="operation">Operation which user choose</param>
-        private void PlayRound(Operations operation)
+        private void PlayGame(Operations operation)
         {
 
-            int[] numbers = new int[2];
+            
             bool validResponse = true;
-            int roundNumber = 1;
+            _round = 1;
             char operationCharacter = GetOperationCharacter(operation);
 
             while (validResponse)
             {
-                if (operation != Operations.Division)
-                    numbers = GetOperationNumbers();
-                else
-                    numbers = GetOperationNumbers(true);
-
-                DisplayClass.PrintGame(roundNumber, numbers, operationCharacter);
-
-                int result = GetResult(numbers, operation);
-                int userResult;
-                int.TryParse(Console.ReadLine(), out userResult);
-
-                if(userResult == result)
-                    roundNumber++;
-                else
-                {
-                    validResponse = false;
-                    EndRound(roundNumber, numbers, operationCharacter, userResult, result);
-
-                }
-                    
-                    
+                validResponse = PlayRound(operation);
+                _round++;
             }
-
+            _round = 1;
         }
         /// <summary>
-        /// Method handling end of the round, adding game to history and user choice to continue or exit the app
+        /// 
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <returns>True, if user's answer is corrent, false otherwise</returns>
+        private bool PlayRound(Operations operation)
+        {
+            Operations roundStart = operation;
+            int[] numbers = new int[2];
+            
+
+            if (operation == Operations.Random)
+                operation = GetRandomOperation();
+
+            if (operation != Operations.Division)
+                numbers = GetOperationNumbers();
+            else
+                numbers = GetOperationNumbers(true);
+
+            char operationCharacter = GetOperationCharacter(operation);
+            DisplayClass.PrintRound(_round, numbers, operationCharacter);
+
+            int result = GetResult(numbers, operation);
+            int userResult;
+            int.TryParse(Console.ReadLine(), out userResult);
+
+            if (userResult == result)
+            {
+                return true;
+            }
+            else {
+                operationCharacter = GetOperationCharacter(roundStart);
+                EndRound(_round, numbers, operationCharacter, userResult, result);
+                return false;
+            }
+
+
+
+        }
+        private Operations GetRandomOperation()
+        {
+            Random random = new Random();
+            return (random.Next(1, 5)) switch {
+                1 => Operations.Addition,
+                2 => Operations.Substraction,
+                3 => Operations.Multiplication,
+                4 => Operations.Division,
+                _ => throw new NotImplementedException("Invalid ENUM passed during getting random value")
+            }; 
+        }
+
+        /// <summary>
+        /// Handles end of the round, adding game to history and user choice to continue or exit the app
         /// </summary>
         /// <param name="roundNumber">Number of current round played</param>
         /// <param name="numbers">Numbers used for the equation</param>
@@ -163,7 +196,7 @@ namespace STUDY.MathGame
                 Environment.Exit(0);
         }
         /// <summary>
-        /// Method to receive appropriate character for each operation, used for logging games to history
+        /// Receive appropriate character for each operation, used for logging games to history
         /// </summary>
         /// <param name="operation">Operation user choose for the game</param>
         /// <returns>Character representing each operation</returns>
@@ -175,11 +208,12 @@ namespace STUDY.MathGame
                 Operations.Substraction => '-',
                 Operations.Multiplication => '*',
                 Operations.Division => '/',
-                _ => throw new NotImplementedException("Invalid ENUM value passed"),
+                Operations.Random => '@',
+                _ => throw new NotImplementedException("Invalid ENUM value passed for getting a character"),
             };
         }
         /// <summary>
-        /// Method used to calculate result of the current round
+        /// Calculates result of the current round
         /// </summary>
         /// <param name="numbers">Numbers generated for current round</param>
         /// <param name="operation">Operation user choose for the game</param>
@@ -196,7 +230,7 @@ namespace STUDY.MathGame
             };
         }
         /// <summary>
-        /// Method faciliating "translation" of input to specific operations represented by Enum
+        /// Translate user input to specific operations represented by Enum
         /// </summary>
         /// <param name="numericInput">Numberic value of key pressed by the user</param>
         /// <returns>Enum value representing chosen operation</returns>
@@ -215,7 +249,7 @@ namespace STUDY.MathGame
             };
         }
         /// <summary>
-        /// Method for getting numbers used for the calculations within the game
+        /// MGet numbers used for the calculations within the game
         /// </summary>
         /// <param name="division">Optional parameter to represent division operation</param>
         /// <returns>int array of 2 values representing generated numbers</returns>
@@ -243,7 +277,7 @@ namespace STUDY.MathGame
         }
 
         /// <summary>
-        /// Method faciliating adding played game to the history list
+        /// Add played game to the history list
         /// </summary>
         /// <param name="operation">Represents operand using in the game</param>
         /// <param name="rounds">Represents number of rounds played</param>
@@ -253,7 +287,7 @@ namespace STUDY.MathGame
             
         }
         /// <summary>
-        /// Method used to receive all divisors of a number which returns an integer
+        /// Receive all divisors of a number which returns an integer
         /// </summary>
         /// <param name="number">Divident used for the operation</param>
         /// <returns>Array containing all divisors</returns>
