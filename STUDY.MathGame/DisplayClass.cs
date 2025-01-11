@@ -33,9 +33,10 @@ namespace STUDY.MathGame
             Console.WriteLine("2. Substraction");
             Console.WriteLine("3. Multiplication");
             Console.WriteLine("4. Division");
+            Console.WriteLine("5. Random game ---- TO BE IMPLEMENTED");
             Console.WriteLine();
-            Console.WriteLine("5. Show game history");
-            Console.WriteLine();
+            Console.WriteLine("6. Show game history");
+            Console.WriteLine("7. Exit game");
             Console.WriteLine("Please enter a number representing your choice followed-up by 'Enter': ");
             Console.Write("Your choice: ");
 

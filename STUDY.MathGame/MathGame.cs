@@ -16,6 +16,7 @@ namespace STUDY.MathGame
         Substraction,
         Multiplication,
         Division,
+        Random,
         History,
         Exit,
         Menu,
@@ -32,7 +33,7 @@ namespace STUDY.MathGame
         /// </summary>
         private List<string> history { get; set; }
         private ConsoleKey userChoice { get; set; }
-        private readonly int _maxNumber = 10;
+        private int _maxNumber = 100;
 
         /// <summary>
         /// Initializes new instance of MathGame class
@@ -64,7 +65,7 @@ namespace STUDY.MathGame
                     case Operations.Substraction:
                     case Operations.Multiplication:
                     case Operations.Division:
-                        PlayRound(operation);  
+                        PlayRound(operation);
                         break;
                     case Operations.History:
                         DisplayClass.PrintHistory(history);
@@ -216,7 +217,13 @@ namespace STUDY.MathGame
                 case ConsoleKey.D5:
                     return Operations.History;
 
-                case ConsoleKey.Escape: 
+                case ConsoleKey.NumPad6:
+                case ConsoleKey.D6:
+                    return Operations.History;
+
+                case ConsoleKey.NumPad7:
+                case ConsoleKey.D7:
+                case ConsoleKey.Escape:
                     return Operations.Exit;
 
                 default:
@@ -240,12 +247,13 @@ namespace STUDY.MathGame
             }
             else
             {
-                // fisrt getting divisor
-                // then, divident will be calculated as random numer times divisor
-                int divisor = random.Next(1,_maxNumber);
+                // division operands Divident/ Divisor
 
-                numbers[1] = divisor;
-                numbers[0] = random.Next(_maxNumber) * divisor;
+                int divident = random.Next(_maxNumber);
+                int[] divisors = FindAllDivisors(divident);
+
+                numbers[0] = divident;
+                numbers[1] = divisors[random.Next(0, divisors.Length)];
             }
 
             return numbers;
@@ -260,6 +268,26 @@ namespace STUDY.MathGame
             string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds}";
             history.Add(game);
             
+        }
+        /// <summary>
+        /// Method used to receive all divisors of a number which returns an integer
+        /// </summary>
+        /// <param name="number">Divident used for the operation</param>
+        /// <returns>Array containing all divisors</returns>
+        private int[] FindAllDivisors(int number)
+        {
+            int squareRoot = (int)Math.Pow(number, 0.5);
+            List<int> dividents = new List<int>();
+            dividents.Add(1);
+            for (int i = 2; i <= squareRoot; i++) {
+                if (number % i == 0) {
+                    dividents.Add(i);
+                    dividents.Add(number / i);
+
+                }
+            }
+            // dont need to be sorted
+            return dividents.ToArray();
         }
 
     }
