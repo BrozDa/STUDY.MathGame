@@ -69,18 +69,43 @@ namespace STUDY.MathGame
             PrintMenuHeader();
 
             Console.WriteLine("Please select one option to start a new game, show game history, or press 'ESC' to exit: ");
+            Console.WriteLine();
             Console.WriteLine("1. Addition");
             Console.WriteLine("2. Substraction");
             Console.WriteLine("3. Multiplication");
             Console.WriteLine("4. Division");
             Console.WriteLine("5. Random game");
             Console.WriteLine();
-            Console.WriteLine("6. Show game history");
-            Console.WriteLine("7. Exit game");
+            Console.WriteLine("6. Select Difficulty");
+            Console.WriteLine("7. Show game history");
+            Console.WriteLine("8. Exit game");
             Console.WriteLine();
             Console.WriteLine("Please enter a number representing your choice followed-up by 'Enter': ");
             Console.Write("Your choice: ");
 
+        }
+        /// <summary>
+        /// Dificulty selection menu
+        /// </summary>
+        /// <param name="current">current difficulty</param>
+        public static void PrintDifficultySelectionMenu(Difficulty current)
+        {
+            PrintMenuHeader();
+            int number = 1;
+            Console.WriteLine("Select difficulty, current setting is marked by '***':, or hit 'ESC' to exit to main menu ");
+            Console.WriteLine();
+            foreach (Difficulty dif in Enum.GetValues(typeof(Difficulty)))
+            {
+
+                Console.Write(number++ + ": ");
+
+                if(current == dif)
+                    Console.Write("***");
+                Console.WriteLine(dif);
+            }
+            Console.WriteLine("4: Exit to main menu");
+            Console.WriteLine();
+            Console.Write("Your choice: ");
         }
         /// <summary>
         /// Prints equation for current round

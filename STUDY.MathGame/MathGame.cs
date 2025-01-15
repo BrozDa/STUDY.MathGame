@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Timers;
+
 
 namespace STUDY.MathGame
 {
@@ -19,8 +14,18 @@ namespace STUDY.MathGame
         Multiplication = 3,
         Division = 4,
         Random = 5,
-        History = 6,
-        Exit = 7,
+        Difficulty = 6,
+        History = 7,
+        Exit = 8,
+    }
+    /// <summary>
+    /// Represent maximum operand value for each difficulty
+    /// </summary>
+    enum Difficulty: int
+    {
+        Easy = 10,
+        Medium = 100,
+        Hard = 1000,
     }
     /// <summary>
     /// Class supporting the Math game
@@ -31,14 +36,22 @@ namespace STUDY.MathGame
         /// list property is used to track history games
         /// userChoice key property is used to track user input
         /// _maxNumber readonly field is used to determine max number for math operations
+        /// _round represents the current round number
+        /// _roundTime represents the duration of current round
+        /// _gameTime represents the duration of current game
+        /// _timer represent timer used to adjust current duration in the header
         /// </summary>
+        /// 
         private List<string> history { get; set; }
         private int userChoice { get; set; }
-        private int _maxNumber = 10;
+        private Difficulty _difficulty = Difficulty.Easy;
+        private int _maxNumber;
         private int _round = 0;
         private Stopwatch _roundTime;
         private Stopwatch _gameTime;
         private System.Timers.Timer _timer;
+        
+
 
 
         /// <summary>
@@ -48,22 +61,28 @@ namespace STUDY.MathGame
         public MathGame()
         {
             history = new List<string>();
+            _maxNumber = (int)_difficulty;
             _roundTime = new Stopwatch();
             _gameTime = new Stopwatch();
             _timer = new System.Timers.Timer();
         }
-
+        /// <summary>
+        /// Setups 1s timer and calls UpdateHeaderWithTime method everytime its elapsed
+        /// </summary>
         public void StartTimer()
         {
-            _roundTime.Start();
             _timer.Enabled = true;
             _timer.Interval = 1000;
             _timer.AutoReset = true;
-            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.UpdateHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+            _timer.Elapsed += new ElapsedEventHandler(delegate { 
+                DisplayClass.UpdateHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);
+            });
         }
+        /// <summary>
+        /// Stops the timer used to update header with current durations
+        /// </summary>
         public void StopTimer()
         {
-            _roundTime.Reset();
             _timer.Enabled= false;
         }
         /// <summary>
@@ -89,6 +108,9 @@ namespace STUDY.MathGame
                     case Operations.Division:
                     case Operations.Random:
                         PlayGame(operation);
+                        break;
+                    case Operations.Difficulty:
+                        SelectDifficulty();
                         break;
                     case Operations.History:
                         DisplayClass.PrintHistory(history);
@@ -135,8 +157,10 @@ namespace STUDY.MathGame
         /// <param name="operation">Operation which user choose</param>
         private void PlayGame(Operations operation)
         {
-
+            StartTimer();
+            
             _gameTime.Start();
+            _maxNumber = (int)_difficulty;
 
             bool validResponse = true;
             _round = 1;
@@ -148,7 +172,8 @@ namespace STUDY.MathGame
                 _round++;
             }
 
-            
+            _gameTime.Reset();
+            StopTimer();
             _round = 1;
         }
         /// <summary>
@@ -158,29 +183,38 @@ namespace STUDY.MathGame
         /// <returns>True, if user's answer is corrent, false otherwise</returns>
         private bool PlayRound(Operations operation)
         {
-            StartTimer();
-            _timer.Elapsed += new ElapsedEventHandler(delegate { DisplayClass.UpdateHeaderWithTime(_roundTime.Elapsed, _gameTime.Elapsed, _round);});
+           
+            _roundTime.Start();
+            
             DisplayClass.PrintGameHeader(_round, _gameTime.Elapsed);
 
             Operations roundStart = operation;
             int[] numbers = new int[2];
 
+            //if user choose random operation then it needs to be generated
             if (operation == Operations.Random)
                 operation = GetRandomOperation();
 
-            if (operation != Operations.Division)
-                numbers = GetOperationNumbers();
-            else
+            //operands are calculated differently for division operations to ensure valid results
+            if (operation == Operations.Division)
                 numbers = GetOperationNumbers(true);
+            else
+                numbers = GetOperationNumbers();
 
             char operationCharacter = GetOperationCharacter(operation);
             DisplayClass.PrintRoundEquation(_round, numbers, operationCharacter);
 
             int result = GetResult(numbers, operation);
             int userResult;
-            int.TryParse(Console.ReadLine(), out userResult);
 
-            StopTimer();
+            while (!int.TryParse(Console.ReadLine(), out userResult))
+            {
+                Console.WriteLine("Enter a valid number: ");
+                DisplayClass.PrintRoundEquation(_round, numbers, operationCharacter);
+            }
+
+
+            _roundTime.Reset();
 
             if (userResult == result)
             {
@@ -188,14 +222,19 @@ namespace STUDY.MathGame
             }
             else {
                 operationCharacter = GetOperationCharacter(roundStart);
-                EndCurrentGame(_round, numbers, operationCharacter, userResult, result, _gameTime.Elapsed);
-                _gameTime.Reset();
+                EndCurrentGame(_round, numbers, operationCharacter, userResult, result, _gameTime.Elapsed, _difficulty);
                 return false;
             }
+            
 
 
 
         }
+        /// <summary>
+        /// Generate random operation
+        /// </summary>
+        /// <returns>Generated operation</returns>
+        /// <exception cref="NotImplementedException"></exception>
         private Operations GetRandomOperation()
         {
             Random random = new Random();
@@ -216,11 +255,11 @@ namespace STUDY.MathGame
         /// <param name="operationCharacter">Character representing the operation</param>
         /// <param name="userResult">user input - invalid result to the equation</param>
         /// <param name="result">Valid result of the equation</param>
-        private void EndCurrentGame(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result, TimeSpan gameTime)
+        private void EndCurrentGame(int roundNumber, int[] numbers, char operationCharacter, int userResult, int result, TimeSpan gameTime, Difficulty difficulty)
         {
             DisplayClass.PrintEndGame(roundNumber, numbers, operationCharacter, userResult, result);
             ConsoleKey input = Console.ReadKey().Key;
-            AddGameToHistory(operationCharacter, roundNumber,gameTime);
+            AddGameToHistory(operationCharacter, roundNumber,gameTime, difficulty);
             if (input != ConsoleKey.Enter)
                 Environment.Exit(0);
                
@@ -273,8 +312,9 @@ namespace STUDY.MathGame
                 3 => Operations.Multiplication,
                 4 => Operations.Division,
                 5 => Operations.Random,
-                6 => Operations.History,
-                7 => Operations.Exit,
+                6 => Operations.Difficulty,
+                7 => Operations.History,
+                8 => Operations.Exit,
                 _ => throw new NotImplementedException("Invalid ENUM passed")
             };
         }
@@ -311,8 +351,8 @@ namespace STUDY.MathGame
         /// </summary>
         /// <param name="operation">Represents operand using in the game</param>
         /// <param name="rounds">Represents number of rounds played</param>
-        private void AddGameToHistory(char operation, int rounds, TimeSpan gameTime) {
-            string game = $"{DateTime.Now.ToString()} | Operation: {operation} | Rounds: {rounds} | Time {gameTime.Seconds}s";
+        private void AddGameToHistory(char operation, int rounds, TimeSpan gameTime, Difficulty difficulty) {
+            string game = $"{DateTime.Now.ToString()} | Difficulty: {difficulty} | Operation: {operation} | Rounds: {rounds} | Time {gameTime.Seconds}s";
             history.Add(game);
             
         }
@@ -336,6 +376,63 @@ namespace STUDY.MathGame
             // dont need to be sorted
             return dividents.ToArray();
         }
+        /// <summary>
+        /// Selects difficulty in selection screen
+        /// </summary>
+        private void SelectDifficulty()
+        {
+            bool validInput = false;
+            DisplayClass.PrintDifficultySelectionMenu(_difficulty);
+
+            Difficulty requestedDificulty = _difficulty;
+
+            while (!validInput)
+            {
+                string? userInput = Console.ReadLine();
+                int numberInput;
+
+                if (int.TryParse(userInput, out numberInput) &&
+                    (numberInput >= 1 && numberInput <= 4))
+                {
+
+                    //option 4 means exit and difficulty remains the same
+                    if (numberInput == 4) {
+                        requestedDificulty = _difficulty;
+                    }
+                    //anything else will be processed
+                    else
+                    {
+                        requestedDificulty = ProcessDifficulty(numberInput);
+                    }
+                    validInput = true;
+
+                }
+                else
+                {
+                    Console.Write("Enter a valid choice:");
+                }
+
+                _difficulty = requestedDificulty;
+
+            }
+        }
+        /// <summary>
+        /// Returns difficulty based on passed integer
+        /// </summary>
+        /// <param name="number">integer representing difficulty in selection screen</param>
+        /// <returns>returns difficulty based on passed integer</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private Difficulty ProcessDifficulty(int number) {
+            return number switch
+            {
+                1 => Difficulty.Easy,
+                2 => Difficulty.Medium,
+                3 => Difficulty.Hard,
+                _ => throw new NotImplementedException("Invalid Difficulty selection")
+            };
+        }
+
+        
 
     }
 }
